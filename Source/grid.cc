@@ -1,34 +1,49 @@
 #include "../Headers/grid.h"
 #include "../Headers/edge.h"
 #include "../Headers/claim.h"
-#include <iostream>
 
 //Takes an x and y coordinate as input and creates a grid of that size filled with default nodes
-Utilities::Grid::Grid(int width, int height) {
+Utilities::Grid::Grid(ProblemObject* problem_object) {
+      this->num_connections = problem_object->get_connections().size();
+      this->connections = problem_object->get_connections();
+      int height = problem_object->get_height();
+      int width = problem_object->get_width();
       for(int y = 0; y < height; y++) {
 		  vector<Node*> temp_row;
 	      for(int x = 0; x < width; x++) {
-			  Node* new_node = new Node(x,y);
-			  if (x > 0) {
+			  Node* new_node = new Node(x,y,0);
+			  /*if (x > 0) {
 				  Edge* west = new Edge(new_node,temp_row.at(temp_row.size()-1));
 				  new_node->add_connection(west);
 			  }
 			  if (y > 0) {
 				  Edge* north = new Edge(new_node,grid.at(y-1).at(x));
 				  new_node->add_connection(north);
-			  }
+			  }*/
 			  temp_row.push_back(new_node);
           }
           this->grid.push_back(temp_row);
       }
+      vector<Blocker> blockers = problem_object->get_blockers();
+      for(int i=0; i<blockers.size(); i++){
+    	  int y = blockers.at(i).height;
+    	  int x = blockers.at(i).width;
+    	  for(int m=0; m<y; m++){
+    		  for(int n=0; n<x; n++){
+    			  grid.at(blockers.at(i).location.y-1+m).at(blockers.at(i).location.x-1+n)->set_cost(-1);
+    			  //printf("%d %d %d\n",blockers.at(i).location.y+m,blockers.at(i).location.x+n,i);
+    		  }
+    	  }
+      }
+      //print_grid();
 }
 
 //Destructs the grid by deleting each node individually, the node destructors will delete their own set of edges
 Utilities::Grid::~Grid() {
       int width = this->get_width();
       int height = this->get_height();
-      for(int x = 0; x < width; x++) {
-            for(int y = 0; y < width; y++) {
+      for(int y = 0; y < height; y++) {
+            for(int x = 0; x < width; x++) {
                   delete grid.at(y).at(x);
             }
       }
@@ -42,6 +57,10 @@ int Utilities::Grid::get_width() {
 int Utilities::Grid::get_height() {
 	//Assumes a perfect rectangle
 	return this->grid.size();
+}
+
+int Utilities::Grid::get_num_connections() {
+  return this->num_connections;
 }
 
 Node* Utilities::Grid::get_node(int x, int y) {
@@ -102,4 +121,545 @@ void Utilities::Grid::remove_path(int i) {
       vector<Path*>::iterator it = this->paths.begin();
       it += i;
       paths.erase(it);
+}
+
+//Note, we create random paths just as an example of how to create paths, netlists are created similarly
+vector<Path*> Utilities::Grid::test_algorithm() {
+    vector<Path*> paths;
+    srand(time(NULL));
+    Node* node = NULL;
+    int number_paths = this->get_num_connections();
+    for (int i = 0;i < number_paths;i++) {
+      Path* new_path = new Path();
+      /*int x = rand() % this->get_width();
+      int y = rand() % this->get_height();
+      int path_length = 1+rand()%10;
+      for (unsigned j = 0;j < path_length;j++) {
+        bool direction = rand()%2;
+        Point head(x,y);
+        direction?x+=1:y+=1;
+        Point tail(x,y);
+        PathSegment* new_segment = new PathSegment(head,tail);
+        new_path->add_segment(new_segment);
+      }*/
+      int num = fill(i);
+      if(num==-1){
+    	  printf("source is same as sink\n");
+    	  paths.push_back(new_path);
+    	  this->clear();
+    	  continue;
+      }
+      printf("\n");
+      this->print_grid();//输出二维路线的值
+      //calculate path;
+      try{
+
+    	  node = this->grid.at(connections.at(i).source.y).at(connections.at(i).source.x);
+    	  num++;//每什么含义，就是让下面从num开始
+    while(num!=0){
+    	num--;
+    	int r = rand()%4;
+    	if(r==0) goto up;
+    	if(r==1) goto right;
+    	if(r==2) goto down;
+    	if(r==3) goto left;
+start:
+up:    	//up
+    	try{
+		if(this->grid.at(node->get_y()-1).at(node->get_x())->get_cost()==num-1){
+			Point head(node->get_x(),node->get_y());
+			Point tail(node->get_x(),node->get_y()-1);
+			PathSegment* new_segment = new PathSegment(head,tail);
+			new_path->add_segment(new_segment);
+			node = grid.at(node->get_y()-1).at(node->get_x());
+			continue;
+		}}catch(...){}
+right:			//right
+		try{
+		if(this->grid.at(node->get_y()).at(node->get_x()+1)->get_cost()==num-1){
+			Point head(node->get_x(),node->get_y());
+			Point tail(node->get_x()+1,node->get_y());
+			PathSegment* new_segment = new PathSegment(head,tail);
+			new_path->add_segment(new_segment);
+			node = grid.at(node->get_y()).at(node->get_x()+1);
+			continue;
+		}}catch(...){}
+down:			//down
+		try{
+		if(this->grid.at(node->get_y()+1).at(node->get_x())->get_cost()==num-1){
+			Point head(node->get_x(),node->get_y());
+			Point tail(node->get_x(),node->get_y()+1);
+			PathSegment* new_segment = new PathSegment(head,tail);
+			new_path->add_segment(new_segment);
+			node = grid.at(node->get_y()+1).at(node->get_x());
+			continue;
+		}}catch(...){}
+left:		//left
+		try{
+		if(this->grid.at(node->get_y()).at(node->get_x()-1)->get_cost()==num-1){
+			Point head(node->get_x(),node->get_y());
+			Point tail(node->get_x()-1,node->get_y());
+			PathSegment* new_segment = new PathSegment(head,tail);
+			new_path->add_segment(new_segment);
+			node = grid.at(node->get_y()).at(node->get_x()-1);
+			continue;
+		}}catch(...){}
+//		printf("node %d num %d x %d y %d\n",node->get_cost(),num,node->get_x(),node->get_y());
+		if(grid.at(node->get_y()).at(node->get_x()-1)->get_cost()!=-3
+				&&grid.at(node->get_y()+1).at(node->get_x())->get_cost()!=-3
+				&&grid.at(node->get_y()).at(node->get_x()+1)->get_cost()!=-3
+				&&grid.at(node->get_y()-1).at(node->get_x())->get_cost()!=-3){
+			goto start;
+		}
+    }
+      }catch(...){}
+      Point head(node->get_x(),node->get_y());
+      Point tail(connections.at(i).sink.x,connections.at(i).sink.y);
+      PathSegment* new_segment = new PathSegment(head,tail);
+      new_path->add_segment(new_segment);
+      paths.push_back(new_path);
+      this->clear();
+    }
+    return paths;
+}
+
+void Utilities::Grid::print_grid(){
+	for(int y=0; y<grid.size(); y++){
+		for(int x=0; x<grid.at(y).size(); x++){
+			printf("%d ",grid.at(y).at(x)->get_cost());
+		}
+		printf("\n");
+	}
+}
+//填充表格，直到找到为止
+int Utilities::Grid::fill(int i){
+	if(connections.at(i).source.y == connections.at(i).sink.y && connections.at(i).source.x == connections.at(i).sink.x){
+		return -1;
+	}
+	this->grid.at(connections.at(i).source.y).at(connections.at(i).source.x)->set_cost(-2);//0 nothing,-1 blocker,-2 source,-3 dest
+	this->grid.at(connections.at(i).sink.y).at(connections.at(i).sink.x)->set_cost(-3);
+	vector<Node*> list;
+	list.push_back(this->grid.at(connections.at(i).sink.y).at(connections.at(i).sink.x));
+	int j=0;
+	bool flag = false;
+	while(true){//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清楚list，新的结果又放入list。
+		j++;
+		//printf("list size %d j %d\n",list.size(),j);
+		vector<Node*> NodeList(list);
+		list.clear();
+	for(int i=0; i<NodeList.size(); i++){
+		//up
+		try{
+			if(this->grid.at(NodeList.at(i)->get_y()-1).at(NodeList.at(i)->get_x())->get_cost()==0){
+				this->grid.at(NodeList.at(i)->get_y()-1).at(NodeList.at(i)->get_x())
+						->set_cost(j);
+				list.push_back(this->grid.at(NodeList.at(i)->get_y()-1).at(NodeList.at(i)->get_x()));
+			}else if(this->grid.at(NodeList.at(i)->get_y()-1).at(NodeList.at(i)->get_x())->get_cost()==-2){
+				return j;
+			}
+		}catch(...){}
+		//right
+		try{
+					if(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()+1)->get_cost()==0){
+						this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()+1)
+								->set_cost(j);
+						list.push_back(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()+1));
+					}else if(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()+1)->get_cost()==-2){
+						return j;
+					}
+		}catch(...){}
+		//down
+				try{
+					if(this->grid.at(NodeList.at(i)->get_y()+1).at(NodeList.at(i)->get_x())->get_cost()==0){
+						this->grid.at(NodeList.at(i)->get_y()+1).at(NodeList.at(i)->get_x())
+								->set_cost(j);
+						list.push_back(this->grid.at(NodeList.at(i)->get_y()+1).at(NodeList.at(i)->get_x()));
+					}else if(this->grid.at(NodeList.at(i)->get_y()+1).at(NodeList.at(i)->get_x())->get_cost()==-2){
+						return j;
+					}
+				}catch(...){}
+		//left
+				try{
+							if(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()-1)->get_cost()==0){
+								this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()-1)
+										->set_cost(j);
+								list.push_back(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()-1));
+							}else if(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()-1)->get_cost()==-2){
+								return j;
+							}
+				}catch(...){}
+	}
+	}
+}
+//保留障碍，其他清0
+void Utilities::Grid::clear(){
+	for(int y=0; y<grid.size(); y++){
+			for(int x=0; x<grid.at(y).size(); x++){
+				if(grid.at(y).at(x)->get_cost()!=-1){
+					grid.at(y).at(x)->set_cost(0);
+				}
+			}
+		}
+}
+
+//填充表格，直到找到为止
+int Utilities::Grid::fill2bit(int i){
+	if(connections.at(i).source.y == connections.at(i).sink.y && connections.at(i).source.x == connections.at(i).sink.x){
+		return -1;
+	}
+	this->grid.at(connections.at(i).source.y).at(connections.at(i).source.x)->set_cost(-2);//0 nothing,-1 blocker,-2 source,-3 dest
+	this->grid.at(connections.at(i).sink.y).at(connections.at(i).sink.x)->set_cost(-3);
+	vector<Node*> list;
+	list.push_back(this->grid.at(connections.at(i).sink.y).at(connections.at(i).sink.x));
+	int j=0;
+	int p[4] = {1,1,2,2};
+	int q[4] = {1,2,2,1};
+	bool flag = false;
+	while(true){//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清楚list，新的结果又放入list。
+		j++;
+		j=(j==5?1:j);
+		//printf("list size %d j %d\n",list.size(),j);
+		vector<Node*> NodeList(list);
+		list.clear();
+	for(int i=0; i<NodeList.size(); i++){
+		//up
+		try{
+			if(this->grid.at(NodeList.at(i)->get_y()-1).at(NodeList.at(i)->get_x())->get_cost()==0){
+				this->grid.at(NodeList.at(i)->get_y()-1).at(NodeList.at(i)->get_x())
+						->set_cost(q[p[j-1]-1]);
+				list.push_back(this->grid.at(NodeList.at(i)->get_y()-1).at(NodeList.at(i)->get_x()));
+			}else if(this->grid.at(NodeList.at(i)->get_y()-1).at(NodeList.at(i)->get_x())->get_cost()==-2){
+				return j;
+			}
+		}catch(...){}
+		//right
+		try{
+					if(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()+1)->get_cost()==0){
+						this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()+1)
+								->set_cost(q[p[j-1]-1]);
+						list.push_back(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()+1));
+					}else if(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()+1)->get_cost()==-2){
+						return j;
+					}
+		}catch(...){}
+		//down
+				try{
+					if(this->grid.at(NodeList.at(i)->get_y()+1).at(NodeList.at(i)->get_x())->get_cost()==0){
+						this->grid.at(NodeList.at(i)->get_y()+1).at(NodeList.at(i)->get_x())
+								->set_cost(q[p[j-1]-1]);
+						list.push_back(this->grid.at(NodeList.at(i)->get_y()+1).at(NodeList.at(i)->get_x()));
+					}else if(this->grid.at(NodeList.at(i)->get_y()+1).at(NodeList.at(i)->get_x())->get_cost()==-2){
+						return j;
+					}
+				}catch(...){}
+		//left
+				try{
+							if(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()-1)->get_cost()==0){
+								this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()-1)
+										->set_cost(q[p[j-1]-1]);
+								list.push_back(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()-1));
+							}else if(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()-1)->get_cost()==-2){
+								return j;
+							}
+				}catch(...){}
+	}
+	}
+}
+
+//填充表格，直到找到为止
+int Utilities::Grid::fill3bit(int i){
+	if(connections.at(i).source.y == connections.at(i).sink.y && connections.at(i).source.x == connections.at(i).sink.x){
+		return -1;
+	}
+	this->grid.at(connections.at(i).source.y).at(connections.at(i).source.x)->set_cost(-2);//0 nothing,-1 blocker,-2 source,-3 dest
+	this->grid.at(connections.at(i).sink.y).at(connections.at(i).sink.x)->set_cost(-3);
+	vector<Node*> list;
+	list.push_back(this->grid.at(connections.at(i).sink.y).at(connections.at(i).sink.x));
+	int j=-1;
+	bool flag = false;
+	while(true){//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清楚list，新的结果又放入list。
+		j=(j+1)%3;
+		//printf("list size %d j %d\n",list.size(),j);
+		vector<Node*> NodeList(list);
+		list.clear();
+	for(int i=0; i<NodeList.size(); i++){
+		//up
+		try{
+			if(this->grid.at(NodeList.at(i)->get_y()-1).at(NodeList.at(i)->get_x())->get_cost()==0){
+				this->grid.at(NodeList.at(i)->get_y()-1).at(NodeList.at(i)->get_x())
+						->set_cost(j+1);
+				list.push_back(this->grid.at(NodeList.at(i)->get_y()-1).at(NodeList.at(i)->get_x()));
+			}else if(this->grid.at(NodeList.at(i)->get_y()-1).at(NodeList.at(i)->get_x())->get_cost()==-2){
+				return j+1;
+			}
+		}catch(...){}
+		//right
+		try{
+					if(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()+1)->get_cost()==0){
+						this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()+1)
+								->set_cost(j+1);
+						list.push_back(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()+1));
+					}else if(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()+1)->get_cost()==-2){
+						return j+1;
+					}
+		}catch(...){}
+		//down
+				try{
+					if(this->grid.at(NodeList.at(i)->get_y()+1).at(NodeList.at(i)->get_x())->get_cost()==0){
+						this->grid.at(NodeList.at(i)->get_y()+1).at(NodeList.at(i)->get_x())
+								->set_cost(j+1);
+						list.push_back(this->grid.at(NodeList.at(i)->get_y()+1).at(NodeList.at(i)->get_x()));
+					}else if(this->grid.at(NodeList.at(i)->get_y()+1).at(NodeList.at(i)->get_x())->get_cost()==-2){
+						return j+1;
+					}
+				}catch(...){}
+		//left
+				try{
+							if(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()-1)->get_cost()==0){
+								this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()-1)
+										->set_cost(j+1);
+								list.push_back(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()-1));
+							}else if(this->grid.at(NodeList.at(i)->get_y()).at(NodeList.at(i)->get_x()-1)->get_cost()==-2){
+								return j+1;
+							}
+				}catch(...){}
+	}
+	}
+}
+
+
+vector<Path*> Utilities::Grid::test_algorithm2bit() {
+    vector<Path*> paths;
+    srand(time(NULL));
+    Node* node = NULL;
+    int p[4] = {1,1,2,2};
+    int q[4] = {1,2,2,1};
+    int number_paths = this->get_num_connections();
+    for (int i = 0;i < number_paths;i++) {
+      Path* new_path = new Path();
+      /*int x = rand() % this->get_width();
+      int y = rand() % this->get_height();
+      int path_length = 1+rand()%10;
+      for (unsigned j = 0;j < path_length;j++) {
+        bool direction = rand()%2;
+        Point head(x,y);
+        direction?x+=1:y+=1;
+        Point tail(x,y);
+        PathSegment* new_segment = new PathSegment(head,tail);
+        new_path->add_segment(new_segment);
+      }*/
+      int num = fill2bit(i);
+      if(num==-1){
+    	  printf("source is same as sink\n");
+    	  paths.push_back(new_path);
+    	  this->clear();
+    	  continue;
+      }
+      printf("\n");
+      this->print_grid();//输出二维路线的值
+      //calculate path;
+      try{
+
+    	  node = this->grid.at(connections.at(i).source.y).at(connections.at(i).source.x);
+    while(node->get_cost()!=-3){
+    	num=num-1;
+    	num=(num==0?4:num);
+    	int r=q[p[num-1]-1];
+    	int rr = rand()%4;
+    	if(rr==0) goto up;
+    	if(rr==1) goto right;
+    	if(rr==2) goto down;
+    	if(rr==3) goto left;
+start:
+up:
+//    	printf("%d %d %d %d\n",num,node->get_x(),node->get_y(),node->get_cost());
+    	//up
+    	try{
+		if(this->grid.at(node->get_y()-1).at(node->get_x())->get_cost()==r){
+			Point head(node->get_x(),node->get_y());
+			Point tail(node->get_x(),node->get_y()-1);
+			PathSegment* new_segment = new PathSegment(head,tail);
+			new_path->add_segment(new_segment);
+			node = grid.at(node->get_y()-1).at(node->get_x());
+			continue;
+		}else if(this->grid.at(node->get_y()-1).at(node->get_x())->get_cost()==-3){
+			break;
+		}}catch(...){}
+right:			//right
+		try{
+		if(this->grid.at(node->get_y()).at(node->get_x()+1)->get_cost()==r){
+			Point head(node->get_x(),node->get_y());
+			Point tail(node->get_x()+1,node->get_y());
+			PathSegment* new_segment = new PathSegment(head,tail);
+			new_path->add_segment(new_segment);
+			node = grid.at(node->get_y()).at(node->get_x()+1);
+			continue;
+		}else if(this->grid.at(node->get_y()).at(node->get_x()+1)->get_cost()==-3){
+			break;
+		}}catch(...){}
+down:			//down
+		try{
+		if(this->grid.at(node->get_y()+1).at(node->get_x())->get_cost()==r){
+			Point head(node->get_x(),node->get_y());
+			Point tail(node->get_x(),node->get_y()+1);
+			PathSegment* new_segment = new PathSegment(head,tail);
+			new_path->add_segment(new_segment);
+			node = grid.at(node->get_y()+1).at(node->get_x());
+			continue;
+		}else if(this->grid.at(node->get_y()+1).at(node->get_x())->get_cost()==-3){
+			break;
+		}}catch(...){}
+left:			//left
+		try{
+		if(this->grid.at(node->get_y()).at(node->get_x()-1)->get_cost()==r){
+			Point head(node->get_x(),node->get_y());
+			Point tail(node->get_x()-1,node->get_y());
+			PathSegment* new_segment = new PathSegment(head,tail);
+			new_path->add_segment(new_segment);
+			node = grid.at(node->get_y()).at(node->get_x()-1);
+			continue;
+		}else if(this->grid.at(node->get_y()).at(node->get_x()-1)->get_cost()==-3){
+			break;
+		}}catch(...){}
+		if(grid.at(node->get_y()).at(node->get_x()-1)->get_cost()!=-3
+						&&grid.at(node->get_y()+1).at(node->get_x())->get_cost()!=-3
+						&&grid.at(node->get_y()).at(node->get_x()+1)->get_cost()!=-3
+						&&grid.at(node->get_y()-1).at(node->get_x())->get_cost()!=-3){
+					goto start;
+				}
+    }
+      }catch(...){}
+      Point head(node->get_x(),node->get_y());
+      Point tail(connections.at(i).sink.x,connections.at(i).sink.y);
+      PathSegment* new_segment = new PathSegment(head,tail);
+      new_path->add_segment(new_segment);
+      paths.push_back(new_path);
+      this->clear();
+    }
+    return paths;
+}
+
+vector<Path*> Utilities::Grid::test_algorithm3bit() {
+    vector<Path*> paths;
+    srand(time(NULL));
+    Node* node = NULL;
+    int number_paths = this->get_num_connections();
+    for (int i = 0;i < number_paths;i++) {
+      Path* new_path = new Path();
+      /*int x = rand() % this->get_width();
+      int y = rand() % this->get_height();
+      int path_length = 1+rand()%10;
+      for (unsigned j = 0;j < path_length;j++) {
+        bool direction = rand()%2;
+        Point head(x,y);
+        direction?x+=1:y+=1;
+        Point tail(x,y);
+        PathSegment* new_segment = new PathSegment(head,tail);
+        new_path->add_segment(new_segment);
+      }*/
+      int num = fill3bit(i);
+      if(num==-1){
+    	  printf("source is same as sink\n");
+    	  paths.push_back(new_path);
+    	  this->clear();
+    	  continue;
+      }
+      printf("%d\n",num);
+      this->print_grid();//输出二维路线的值
+      //calculate path;
+      try{
+
+    	  node = this->grid.at(connections.at(i).source.y).at(connections.at(i).source.x);
+    while(node->get_cost()!=-3){
+    	bool find = false;
+    	num--;
+    	num=(num==0?3:num);
+    	int rr = rand()%4;
+    	if(rr==0) goto up;
+    	if(rr==1) goto right;
+    	if(rr==2) goto down;
+    	if(rr==3) goto left;
+start:
+up:
+    	//up
+    	try{
+		if(this->grid.at(node->get_y()-1).at(node->get_x())->get_cost()==num){
+			Point head(node->get_x(),node->get_y());
+			Point tail(node->get_x(),node->get_y()-1);
+			PathSegment* new_segment = new PathSegment(head,tail);
+			new_path->add_segment(new_segment);
+			node = grid.at(node->get_y()-1).at(node->get_x());
+			find = true;
+			continue;
+		}else if(this->grid.at(node->get_y()-1).at(node->get_x())->get_cost()==-3){
+			break;
+		}}catch(...){}
+right:
+		try{
+		if(this->grid.at(node->get_y()).at(node->get_x()+1)->get_cost()==num){
+			Point head(node->get_x(),node->get_y());
+			Point tail(node->get_x()+1,node->get_y());
+			PathSegment* new_segment = new PathSegment(head,tail);
+			new_path->add_segment(new_segment);
+			node = grid.at(node->get_y()).at(node->get_x()+1);
+			find = true;
+			continue;
+		}else if(this->grid.at(node->get_y()).at(node->get_x()+1)->get_cost()==-3){
+					break;
+		}}catch(...){}
+down:
+		try{
+		if(this->grid.at(node->get_y()+1).at(node->get_x())->get_cost()==num){
+			Point head(node->get_x(),node->get_y());
+			Point tail(node->get_x(),node->get_y()+1);
+			PathSegment* new_segment = new PathSegment(head,tail);
+			new_path->add_segment(new_segment);
+			node = grid.at(node->get_y()+1).at(node->get_x());
+			find = true;
+			continue;
+		}else if(this->grid.at(node->get_y()+1).at(node->get_x())->get_cost()==-3){
+			break;
+		}}catch(...){}
+left:
+		try{
+		if(this->grid.at(node->get_y()).at(node->get_x()-1)->get_cost()==num){
+			Point head(node->get_x(),node->get_y());
+			Point tail(node->get_x()-1,node->get_y());
+			PathSegment* new_segment = new PathSegment(head,tail);
+			new_path->add_segment(new_segment);
+			node = grid.at(node->get_y()).at(node->get_x()-1);
+			find = true;
+			continue;
+		}else if(this->grid.at(node->get_y()).at(node->get_x()-1)->get_cost()==-3){
+			break;
+		}}catch(...){}
+//		printf("node %d num %d x %d y %d\n",node->get_cost(),num,node->get_x(),node->get_y());
+		if(grid.at(node->get_y()).at(node->get_x()-1)->get_cost()!=-3
+								&&grid.at(node->get_y()+1).at(node->get_x())->get_cost()!=-3
+								&&grid.at(node->get_y()).at(node->get_x()+1)->get_cost()!=-3
+								&&grid.at(node->get_y()-1).at(node->get_x())->get_cost()!=-3){
+							goto start;
+						}
+		if(node->get_cost()==-3){
+			break;
+		}
+		if(!find){
+			PathSegment* new_segment = new_path->at(new_path->get_length()-1);
+			new_path->remove_segment(new_path->get_length()-1);
+			Point tail = new_segment->get_sink();
+			//delete new_segment;
+			node->set_coord(tail.x,tail.y);
+			num = node->get_cost();
+			node->set_cost(0);
+		}
+    }
+      }catch(...){}
+      Point head(node->get_x(),node->get_y());
+      Point tail(connections.at(i).sink.x,connections.at(i).sink.y);
+      PathSegment* new_segment = new PathSegment(head,tail);
+      new_path->add_segment(new_segment);
+      paths.push_back(new_path);
+      this->clear();
+    }
+    return paths;
 }
