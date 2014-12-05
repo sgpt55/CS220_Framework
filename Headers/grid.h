@@ -48,9 +48,20 @@ namespace Utilities {
 				int fill2bit(int i);
 				int fill3bit(int i);
             /* Algorithms */
-            vector<Path*> test_algorithm();
-            vector<Path*> test_algorithm2bit();
-            vector<Path*> test_algorithm3bit();
+            vector<Path*> lee_algorithm();
+            vector<Path*> lee_algorithm2bit();
+            vector<Path*> lee_algorithm3bit();
+				//enhanced
+            vector<Path*> lee_algorithm_rubin();
+            vector<Path*> lee_algorithm2bit_rubin();
+            vector<Path*> lee_algorithm3bit_rubin();
+
+            int fill_lwr(int i);
+            vector<Path*> rubin_algorithm_impv();
+            int fill_rubin(int i);
+            vector<Path*> rubin_algorithm();
+            /*int fill_korn(int i,double m);
+            vector<Path*> korn_algorithm(double m);*/
     };
 }
 
