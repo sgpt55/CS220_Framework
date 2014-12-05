@@ -12,8 +12,8 @@ using std::endl;
 int main(int argc,char* argv[]) {
 
 	// DO NOT CHANGE THIS SECTION OF CODE
-	if(argc < 2) { 
-		cout << "Usage: ./grid_router <test_file>" << endl; 
+	if(argc < 3) {
+		cout << "Usage: ./grid_router <test_file> integer" << endl;
 		exit(1);
 	}
 	Utilities::ProblemObject* first_problem = new Utilities::ProblemObject(std::string(argv[1]));
@@ -36,10 +36,27 @@ int main(int argc,char* argv[]) {
 	Path: a series of straight line segments, with a single source and a single sink
 	Netlist: a series of stright line segments, with a single source and more than one sink
 	*/
-	//vector<Path*> paths = g.test_algorithm();
-	//vector<Path*> paths = g.test_algorithm2bit();
-	vector<Path*> paths = g.test_algorithm3bit();
-
+	int e = atoi(argv[2]);
+	vector<Path*> paths;
+	if(e==0){
+		paths = g.test_algorithm();
+	}else if(e==1){
+		paths = g.test_algorithm2bit();
+	}else if(e==2){
+		paths = g.test_algorithm3bit();
+	}else if(e==3){
+		paths = g.test_algorithmE();
+	}else if(e==4){
+		paths = g.test_algorithm2bitE();
+	}else if(e==5){
+		paths = g.test_algorithm3bitE();
+	}else if(e==6){
+		paths = g.test_algorithm22();
+	}else if(e==7){
+		paths = g.test_algorithm23();
+	}else if(e==8){
+		paths = g.test_algorithm24(atof(argv[3]));
+	}
 	//Print the paths/netlists that you return from your algorithm
 	for(unsigned i = 0; i < paths.size(); i++) {
 		cout << "Path " << i << ": ";
