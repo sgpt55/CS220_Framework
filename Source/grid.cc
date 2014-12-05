@@ -160,13 +160,13 @@ vector<Path*> Utilities::Grid::test_algorithm() {
 			continue;
 		}
 		printf("\n");
-		this->print_grid();//输出二维路线的值
+		this->print_grid();//输出二维路线的值 output value of 2D path
 		//calculate path;
 		try {
 
 			node = this->grid.at(connections.at(i).source.y).at(connections.at(
 					i).source.x);
-			num++;//每什么含义，就是让下面从num开始
+			num++;//没什么含义，就是让下面从num开始
 			while (num != 0) {
 				num--;
 				int r = rand() % 4;
@@ -260,7 +260,7 @@ void Utilities::Grid::print_grid() {
 		printf("\n");
 	}
 }
-//填充表格，直到找到为止
+//填充表格，直到找到为止 fill the grids till find the sink
 int Utilities::Grid::fill(int i) {
 	if (connections.at(i).source.y == connections.at(i).sink.y
 			&& connections.at(i).source.x == connections.at(i).sink.x) {
