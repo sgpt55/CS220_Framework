@@ -134,7 +134,7 @@ void Utilities::Grid::remove_path(int i) {
 }
 
 //Note, we create random paths just as an example of how to create paths, netlists are created similarly
-vector<Path*> Utilities::Grid::test_algorithm() {
+vector<Path*> Utilities::Grid::lee_algorithm() {
 	vector<Path*> paths;
 	srand(time(NULL));
 	Node* node = NULL;
@@ -524,7 +524,7 @@ int Utilities::Grid::fill3bit(int i) {
 	}
 }
 
-vector<Path*> Utilities::Grid::test_algorithm2bit() {
+vector<Path*> Utilities::Grid::lee_algorithm2bit() {
 	vector<Path*> paths;
 	srand(time(NULL));
 	Node* node = NULL;
@@ -658,7 +658,7 @@ vector<Path*> Utilities::Grid::test_algorithm2bit() {
 	return paths;
 }
 
-vector<Path*> Utilities::Grid::test_algorithm3bit() {
+vector<Path*> Utilities::Grid::lee_algorithm3bit() {
 	vector<Path*> paths;
 	srand(time(NULL));
 	Node* node = NULL;
@@ -804,7 +804,7 @@ vector<Path*> Utilities::Grid::test_algorithm3bit() {
 	return paths;
 }
 
-vector<Path*> Utilities::Grid::test_algorithmE() {
+vector<Path*> Utilities::Grid::lee_algorithm_rubin() {
 	vector<Path*> paths;
 	srand(time(NULL));
 	Node* node = NULL;
@@ -825,7 +825,7 @@ vector<Path*> Utilities::Grid::test_algorithmE() {
 
 			node = this->grid.at(connections.at(i).source.y).at(connections.at(
 					i).source.x);
-			num++;//每什么含义，就是让下面从num开始
+			num++;//没什么含义，就是让下面从num开始
 			int d = -1;
 			while (num != 0) {
 				num--;
@@ -919,7 +919,7 @@ vector<Path*> Utilities::Grid::test_algorithmE() {
 	}
 	return paths;
 }
-vector<Path*> Utilities::Grid::test_algorithm2bitE() {
+vector<Path*> Utilities::Grid::lee_algorithm2bit_rubin() {
 	vector<Path*> paths;
 	srand(time(NULL));
 	Node* node = NULL;
@@ -1062,7 +1062,7 @@ vector<Path*> Utilities::Grid::test_algorithm2bitE() {
 	return paths;
 }
 
-vector<Path*> Utilities::Grid::test_algorithm3bitE() {
+vector<Path*> Utilities::Grid::lee_algorithm3bit_rubin() {
 	vector<Path*> paths;
 	srand(time(NULL));
 	Node* node = NULL;
@@ -1206,7 +1206,7 @@ vector<Path*> Utilities::Grid::test_algorithm3bitE() {
 	return paths;
 }
 
-int Utilities::Grid::fill23(int i) {
+int Utilities::Grid::fill_rubin(int i) {
 	if (connections.at(i).source.y == connections.at(i).sink.y
 			&& connections.at(i).source.x == connections.at(i).sink.x) {
 		return -1;
@@ -1308,14 +1308,14 @@ int Utilities::Grid::fill23(int i) {
 		}
 	}
 }
-vector<Path*> Utilities::Grid::test_algorithm23() {
+vector<Path*> Utilities::Grid::rubin_algorithm() {
 	vector<Path*> paths;
 	srand(time(NULL));
 	Node* node = NULL;
 	int number_paths = this->get_num_connections();
 	for (int i = 0; i < number_paths; i++) {
 		Path* new_path = new Path();
-		int num = fill23(i);
+		int num = fill_rubin(i);
 		if (num == -1) {
 			printf("source is same as sink\n");
 			paths.push_back(new_path);
@@ -1428,7 +1428,7 @@ vector<Path*> Utilities::Grid::test_algorithm23() {
 	}
 	return paths;
 }
-int Utilities::Grid::fill22(int i) {
+int Utilities::Grid::fill_lwr(int i) {
 	if (connections.at(i).source.y == connections.at(i).sink.y
 			&& connections.at(i).source.x == connections.at(i).sink.x) {
 		return -1;
@@ -1534,14 +1534,14 @@ int Utilities::Grid::fill22(int i) {
 		}
 	}
 }
-vector<Path*> Utilities::Grid::test_algorithm22() {
+vector<Path*> Utilities::Grid::rubin_algorithm_impv() {
 	vector<Path*> paths;
 	srand(time(NULL));
 	Node* node = NULL;
 	int number_paths = this->get_num_connections();
 	for (int i = 0; i < number_paths; i++) {
 		Path* new_path = new Path();
-		int num = fill22(i);
+		int num = fill_lwr(i);
 		if (num == -1) {
 			printf("source is same as sink\n");
 			paths.push_back(new_path);
@@ -1651,7 +1651,7 @@ vector<Path*> Utilities::Grid::test_algorithm22() {
 	return paths;
 }
 
-int Utilities::Grid::fill24(int k, double m) {
+/*int Utilities::Grid::fill_korn(int k, double m) {
 	if (connections.at(k).source.y == connections.at(k).sink.y
 			&& connections.at(k).source.x == connections.at(k).sink.x) {
 		return -1;
@@ -1877,14 +1877,14 @@ int Utilities::Grid::fill24(int k, double m) {
 		}
 	}
 }
-vector<Path*> Utilities::Grid::test_algorithm24(double m) {
+vector<Path*> Utilities::Grid::korn_algorithm(double m) {
 	vector<Path*> paths;
 	srand(time(NULL));
 	Node* node = NULL;
 	int number_paths = this->get_num_connections();
 	for (int i = 0; i < number_paths; i++) {
 		Path* new_path = new Path();
-		int num = fill24(i, m);
+		int num = fill_korn(i, m);
 		if (num == -1) {
 			printf("source is same as sink\n");
 			paths.push_back(new_path);
@@ -1993,4 +1993,4 @@ vector<Path*> Utilities::Grid::test_algorithm24(double m) {
 		this->clear();
 	}
 	return paths;
-}
+}*/

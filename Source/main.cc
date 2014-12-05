@@ -39,24 +39,24 @@ int main(int argc,char* argv[]) {
 	int e = atoi(argv[2]);
 	vector<Path*> paths;
 	if(e==0){
-		paths = g.test_algorithm();
+		paths = g.lee_algorithm();
 	}else if(e==1){
-		paths = g.test_algorithm2bit();
+		paths = g.lee_algorithm2bit();
 	}else if(e==2){
-		paths = g.test_algorithm3bit();
+		paths = g.lee_algorithm3bit();
 	}else if(e==3){
-		paths = g.test_algorithmE();
+		paths = g.lee_algorithm_rubin();
 	}else if(e==4){
-		paths = g.test_algorithm2bitE();
+		paths = g.lee_algorithm2bit_rubin();
 	}else if(e==5){
-		paths = g.test_algorithm3bitE();
+		paths = g.lee_algorithm3bit_rubin();
 	}else if(e==6){
-		paths = g.test_algorithm22();
+		paths = g.rubin_algorithm_impv();
 	}else if(e==7){
-		paths = g.test_algorithm23();
-	}else if(e==8){
-		paths = g.test_algorithm24(atof(argv[3]));
-	}
+		paths = g.rubin_algorithm();
+	/*}else if(e==8){
+		paths = g.korn_algorithm(atof(argv[3]));
+	}*/
 	//Print the paths/netlists that you return from your algorithm
 	for(unsigned i = 0; i < paths.size(); i++) {
 		cout << "Path " << i << ": ";
