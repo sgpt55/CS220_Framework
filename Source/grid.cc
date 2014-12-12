@@ -50,6 +50,43 @@ Utilities::Grid::~Grid() {
 	}
 }
 
+//boarder check
+/*bool Utilities::Grid::IsBlockUp(int x, int y)
+{
+	if (y - 1 < 0 || grid.at(y - 1).at(x)->get_costInt() == -1)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool Utilities::Grid::IsBlockLeft(int x, int y)
+{
+	if (x - 1 < 0 || grid.at(y).at(x - 1)->get_costInt() == -1)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool Utilities::Grid::IsBlockDown(int x, int y)
+{
+	if (y + 1 >= get_height() || grid.at(y + 1).at(x)->get_costInt() == -1)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool Utilities::Grid::IsBlockRight(int x, int y)
+{
+	if (x + 1 >= get_width() || grid.at(y).at(x + 1)->get_costInt() == -1)
+	{
+		return true;
+	}
+	return false;
+}*/
+
 int Utilities::Grid::get_width() {
 	//Assumes a perfect rectangle
 	return grid.empty() ? 0 : grid.at(0).size();

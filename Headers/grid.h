@@ -26,6 +26,11 @@ namespace Utilities {
             Grid(ProblemObject* problem_object);
             ~Grid();
 
+			bool IsBlockUp(int x, int y);
+			bool IsBlockLeft(int x, int y);
+			bool IsBlockDown(int x, int y);
+			bool IsBlockRight(int x, int y);
+
             /* Accessors */
             int get_width();
             int get_height();
@@ -41,12 +46,12 @@ namespace Utilities {
             void add_path(Path* path);
             void replace_path(int i, Path* path);
             void remove_path(int i);
-				void print_grid();
-				void clear();
+			void print_grid();
+			void clear();
 
-				int fill(int i);
-				int fill2bit(int i);
-				int fill3bit(int i);
+			int fill(int i);
+			int fill2bit(int i);
+			int fill3bit(int i);
             /* Algorithms */
             vector<Path*> lee_algorithm();
             vector<Path*> lee_algorithm2bit();
