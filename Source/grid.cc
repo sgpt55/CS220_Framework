@@ -160,13 +160,13 @@ vector<Path*> Utilities::Grid::lee_algorithm() {
 			continue;
 		}
 		printf("\n");
-		this->print_grid();//输出二维路线的值 output value of 2D path
+		this->print_grid();//输出二维路线的值 (output value of 2D path)
 		//calculate path;
 		try {
 
 			node = this->grid.at(connections.at(i).source.y).at(connections.at(
 					i).source.x);
-			num++;//没什么含义，就是让下面从num开始
+			num++;
 			while (num != 0) {
 				num--;
 				int r = rand() % 4;
@@ -275,7 +275,7 @@ int Utilities::Grid::fill(int i) {
 			connections.at(i).sink.x));
 	int j = 0;
 	bool flag = false;
-	while (true) {//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清楚list，新的结果又放入list。
+	while (true) {//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清除list，新的结果又放入list (search, pick up value from list, then clear list, put new value into list
 		j++;
 		//printf("list size %d j %d\n",list.size(),j);
 		vector<Node*> NodeList(list);
@@ -342,7 +342,7 @@ int Utilities::Grid::fill(int i) {
 		}
 	}
 }
-//保留障碍，其他清0
+//保留障碍，其他清0 (keep blockers, others 0)
 void Utilities::Grid::clear() {
 	for (int y = 0; y < grid.size(); y++) {
 		for (int x = 0; x < grid.at(y).size(); x++) {
@@ -370,7 +370,7 @@ int Utilities::Grid::fill2bit(int i) {
 	int p[4] = { 1, 1, 2, 2 };
 	int q[4] = { 1, 2, 2, 1 };
 	bool flag = false;
-	while (true) {//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清楚list，新的结果又放入list。
+	while (true) {//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清除list，新的结果又放入list
 		j++;
 		j = (j == 5 ? 1 : j);
 		//printf("list size %d j %d\n",list.size(),j);
@@ -456,7 +456,7 @@ int Utilities::Grid::fill3bit(int i) {
 			connections.at(i).sink.x));
 	int j = -1;
 	bool flag = false;
-	while (true) {//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清楚list，新的结果又放入list。
+	while (true) {//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清除list，新的结果又放入list
 		j = (j + 1) % 3;
 		//printf("list size %d j %d\n",list.size(),j);
 		vector<Node*> NodeList(list);
@@ -825,7 +825,7 @@ vector<Path*> Utilities::Grid::lee_algorithm_rubin() {
 
 			node = this->grid.at(connections.at(i).source.y).at(connections.at(
 					i).source.x);
-			num++;//没什么含义，就是让下面从num开始
+			num++;
 			int d = -1;
 			while (num != 0) {
 				num--;
@@ -1221,7 +1221,7 @@ int Utilities::Grid::fill_rubin(int i) {
 	int j = 0;
 	bool flag = false;
 	int d = 0;
-	while (true) {//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清楚list，新的结果又放入list。
+	while (true) {//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清除list，新的结果又放入list
 		j++;
 		//printf("list size %d j %d\n",list.size(),j);
 		vector<Node*> NodeList(list);
@@ -1443,7 +1443,7 @@ int Utilities::Grid::fill_lwr(int i) {
 	int j = 0;
 	bool flag = false;
 	int d = 0;
-	while (true) {//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清楚list，新的结果又放入list。
+	while (true) {//循环查找，每次从list中取值（NodeList先把值全部拷贝过来），然后清除list，新的结果又放入list
 		j = 10;
 		//printf("list size %d j %d\n",list.size(),j);
 		vector<Node*> NodeList(list);
